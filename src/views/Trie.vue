@@ -1,6 +1,6 @@
 <template>
   <section class="home">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
     <video src="/1.mp4" class="video-slide" autoplay muted loop></video>
     <div class="content">
       <table class="table table-bordered">
@@ -17,8 +17,8 @@
           </tr>
           <tr v-for="(group, index) in filteredPointGroups" :key="index">
             <td>{{ group.label }}</td>
-            <td>Liste des {{ group.label }}</td>
-            <td class="center-button"><button @click="downloadFile(group)" class="download-button"><i class="fa fa-trophy"></i> Gagnants</button></td>
+            <td>Liste des gagnants du {{ group.label }}</td>
+            <td class="center-button"><button @click="selectWinners(group)" class="download-button"><i class="fa fa-trophy"></i> Tirer au sort</button></td>
           </tr>
         </tbody>
       </table>
@@ -27,8 +27,7 @@
 </template>
 
 <script>
-import * as XLSX from 'xlsx';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   computed: {
@@ -43,27 +42,24 @@ export default {
   data() {
     return {
       pointGroups: [
-        { label: 'Gagnants à 1500 points', minPoints: 1500, maxPoints: 2000 },
-        { label: 'Gagnants à 2000 points', minPoints: 2000, maxPoints: 3000 },
-        { label: 'Gagnants à 3000 points', minPoints: 3000, maxPoints: 5000 },
-        { label: 'Gagnants à 5000 points', minPoints: 5000, maxPoints: Infinity },
+        { label: '1500 et moins de 2000', minPoints: 1500, maxPoints: 2000 },
+        { label: '2000 et moins de 3000', minPoints: 2000, maxPoints: 3000 },
+        { label: '3000 et moins de 5000', minPoints: 3000, maxPoints: 5000 },
+        { label: '5000 et plus', minPoints: 5000, maxPoints: Infinity },
       ]
     };
   },
   methods: {
+    ...mapActions(['selectRandomWinners']),
     filteredData(group) {
       return this.fileData.filter(row => {
         const points = row[1];
         return points >= group.minPoints && points < group.maxPoints;
       });
     },
-    downloadFile(group) {
-      const data = this.filteredData(group);
-      const ws = XLSX.utils.aoa_to_sheet([['MSISDN', 'POINTS', 'FIRSTNAME', 'LASTNAME', 'PROFILE', 'DATE_SUBSCRIPTION'], ...data]);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-      const fileName = `Liste des gagnants du ${group.label}.xlsx`;
-      XLSX.writeFile(wb, fileName);
+    selectWinners(group) {
+      this.selectRandomWinners(group);
+      this.$router.push({ name: 'result_page' });
     }
   }
 };
@@ -155,5 +151,19 @@ section {
 
 .download-button:hover {
   background-color: #d45e1a;
+}
+
+.loading-spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #f36f21;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

@@ -15,22 +15,22 @@
       <div class="content">
          <h1>Ose<br><span>EGA YO NA EGA</span></h1>
          <br>
-        <form @submit.prevent="handleSubmit">
-          <div class="file-upload">
-            <input type="file" id="selfile" @change="handleFileUpload" accept=".xls,.xlsx">
-            <label for="selfile" class="upload-label">
-              <i class="fa-solid fa-upload"></i> Charger le fichier
-            </label>
-            <span id="custom_text" class="fil">{{ fileName || 'Aucun fichier chargé' }}</span>
-          </div>
-          <br>
-          <div class="loading-spinner" v-if="loading">
-            <div class="spinner"></div>
-          </div>
-          <div v-if="fileData">
-            <button @click="goToResults" class="result-button"> <i class="fas fa-list"></i> Voir les résultats</button>
-          </div>
-        </form>
+         <form @submit.prevent="handleSubmit">
+        <div class="file-upload">
+          <input type="file" id="selfile" @change="handleFileUpload" accept=".xls,.xlsx">
+          <label for="selfile" class="upload-label">
+            <i class="fa-solid fa-upload"></i> Charger le fichier
+          </label>
+          <span id="custom_text" class="fil">{{ fileName || 'Aucun fichier chargé' }}</span>
+        </div>
+        <br>
+        <div class="loading-spinner" v-if="isLoading">
+          <div class="spinner"></div>
+        </div>
+        <div v-if="fileName && !isLoading">
+          <button @click="goToTrie" class="result-button"><i class="fas fa-list"></i> Voir les résultats</button>
+        </div>
+      </form>
       </div>
     </section>
   </body>
@@ -45,38 +45,41 @@ export default {
   data() {
     return {
       fileName: '',
-      fileData: null,
-      loading: false,
-      errorMessage: ''
+      isLoading: false,
     };
   },
   methods: {
-    ...mapActions(['updateFileData']),
+    ...mapActions(['setFileData']),
     handleFileUpload(event) {
-      this.loading = true; // Activer l'indicateur de chargement
-      this.fileName = ''; // Réinitialiser le nom du fichier
-      this.fileData = null; // Réinitialiser les données du fichier précédent
       const file = event.target.files[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-          this.fileData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-          this.loading = false; // Désactiver l'indicateur de chargement après le chargement du fichier
-        };
-        reader.readAsArrayBuffer(file);
-        this.fileName = file.name;
-        this.errorMessage = '';
+        const validExtensions = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+        if (validExtensions.includes(file.type)) {
+          this.fileName = file.name;
+          this.readFile(file);
+        } else {
+          alert('Veuillez sélectionner un fichier Excel (.xls ou .xlsx).');
+          this.fileName = '';
+          event.target.value = '';
+        }
       } else {
-        this.loading = false; // Désactiver l'indicateur de chargement si aucun fichier n'est sélectionné
+        this.fileName = '';
       }
     },
-    goToResults() {
-      // Mettre à jour les données dans le store
-      this.updateFileData(this.fileData);
-      // Naviguer vers Trie.vue
+    readFile(file) {
+      this.isLoading = true;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], { header: 1 });
+        this.setFileData(worksheet.slice(1)); // Enlever l'entête
+        this.isLoading = false;
+      };
+      reader.readAsArrayBuffer(file);
+    },
+    goToTrie() {
       this.$router.push({ name: 'trie_page' });
     }
   }

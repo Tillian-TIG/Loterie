@@ -23,7 +23,7 @@ import HelloWorld from './components/HelloWorld.vue'
           <div class="navigation-items">
               <Router-link to="/">Acceuil</Router-link>
               <Router-link to="/trie">Resultat du trie</Router-link>
-              <Router-link to="/">Tirage</Router-link>
+              <Router-link to="/resultat">Tirage</Router-link>
           </div>
       </div>
   </header>
