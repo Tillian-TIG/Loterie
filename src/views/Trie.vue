@@ -1,6 +1,6 @@
 <template>
   <section class="home">
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
     <video src="/1.mp4" class="video-slide" autoplay muted loop></video>
     <div class="content">
       <table class="table table-bordered">
@@ -18,7 +18,21 @@
           <tr v-for="(group, index) in filteredPointGroups" :key="index">
             <td>{{ group.label }}</td>
             <td>Liste des gagnants du {{ group.label }}</td>
-            <td class="center-button"><button @click="selectWinners(group)" class="download-button"><i class="fa fa-trophy"></i> Tirer au sort</button></td>
+            <td class="center-button">
+              <div v-if="loadingGroup !== group.label && selectedGroup !== group.label">
+                <button @click="selectWinners(group)" class="download-button">
+                  <i class="fa fa-trophy"></i> Tirer au sort
+                </button>
+              </div>
+              <div v-else-if="loadingGroup === group.label">
+                <div class="loading-spinner"></div>
+              </div>
+              <div v-else-if="selectedGroup === group.label">
+                <button @click="goToResults(group)" class="winners-button">
+                  <i class="fas fa-list"></i> Voir les Gagnants
+                </button>
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -46,7 +60,9 @@ export default {
         { label: '2000 et moins de 3000', minPoints: 2000, maxPoints: 3000 },
         { label: '3000 et moins de 5000', minPoints: 3000, maxPoints: 5000 },
         { label: '5000 et plus', minPoints: 5000, maxPoints: Infinity },
-      ]
+      ],
+      loadingGroup: null,
+      selectedGroup: null,
     };
   },
   methods: {
@@ -58,8 +74,15 @@ export default {
       });
     },
     selectWinners(group) {
-      this.selectRandomWinners(group);
-      this.$router.push({ name: 'result_page' });
+      this.loadingGroup = group.label;
+      setTimeout(() => {
+        this.selectRandomWinners(group);
+        this.loadingGroup = null;
+        this.selectedGroup = group.label;
+      }, 5000); // Simulate a 5 second delay
+    },
+    goToResults(group) {
+      this.$router.push({ name: 'resultat_page', params: { group: group.label } });
     }
   }
 };
@@ -122,16 +145,16 @@ section {
 .table td {
   background-color: rgba(255, 255, 255, 0.945);
   color: #141414;
-  font-weight:500;
+  font-weight: 500;
 }
 
 .center-button {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
 }
 
-.download-button {
+.download-button, .winners-button {
   background-color: #f36f21;
   color: #ffffff;
   padding: 10px 20px;
@@ -143,13 +166,14 @@ section {
   align-items: center;
   justify-content: center;
   transition: background-color 0.3s ease;
+  margin-top: 10px;
 }
 
-.download-button i {
+.download-button i, .winners-button i {
   margin-right: 8px;
 }
 
-.download-button:hover {
+.download-button:hover, .winners-button:hover {
   background-color: #d45e1a;
 }
 

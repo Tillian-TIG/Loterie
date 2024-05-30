@@ -6,11 +6,13 @@
       <div v-if="winners.length === 0">
         <p>Aucun résultat à afficher. Veuillez tirer au sort depuis la page précédente.</p>
       </div>
+      
       <div v-else class="results-container">
         <div v-for="(winner, index) in winners" :key="index" class="winner-card">
           <i class="fa fa-user winner-icon"></i>
-          <p>{{ winner[2] }} {{ winner[3] }}</p>
-          <p>{{ winner[0] }}</p>
+          <p>IDENTITE : {{ winner[2] }} {{ winner[3] }}</p>
+          <p>Numéro : {{ winner[0] }}</p> 
+          <p>Points : {{winner[1]}}</p>
         </div>
       </div>
     </div>
