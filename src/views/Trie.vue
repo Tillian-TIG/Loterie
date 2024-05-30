@@ -21,7 +21,7 @@
             <td class="center-button">
               <div v-if="loadingGroup !== group.label && selectedGroup !== group.label">
                 <button @click="selectWinners(group)" class="download-button">
-                  <i class="fa fa-trophy"></i> Tirer au sort
+                  <i class="fas fa-list"></i> Tirer au sort
                 </button>
               </div>
               <div v-else-if="loadingGroup === group.label">
@@ -29,7 +29,7 @@
               </div>
               <div v-else-if="selectedGroup === group.label">
                 <button @click="goToResults(group)" class="winners-button">
-                  <i class="fas fa-list"></i> Voir les Gagnants
+                  <i class="fa fa-trophy"></i> Voir les Gagnants
                 </button>
               </div>
             </td>
