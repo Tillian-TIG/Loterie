@@ -1,6 +1,8 @@
 <template>
   <section class="home">
+    <!-- Inclusion de la feuille de style FontAwesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <!-- Vidéo de fond -->
     <video src="/1.mp4" class="video-slide" autoplay muted loop></video>
     <div class="content">
       <table class="table table-bordered">
@@ -12,21 +14,26 @@
           </tr>
         </thead>
         <tbody>
+          <!-- Message affiché si aucun fichier n'est chargé -->
           <tr v-if="!fileData || fileData.length === 0">
             <td colspan="3">Aucun fichier chargé. Veuillez charger un fichier depuis la page précédente.</td>
           </tr>
+          <!-- Boucle sur les groupes de points filtrés -->
           <tr v-for="(group, index) in filteredPointGroups" :key="index">
             <td>{{ group.label }}</td>
             <td>Liste des gagnants du {{ group.label }}</td>
             <td class="center-button">
+              <!-- Bouton pour tirer au sort les gagnants -->
               <div v-if="loadingGroup !== group.label && selectedGroup !== group.label">
                 <button @click="selectWinners(group)" class="download-button">
                   <i class="fas fa-list"></i> Tirer au sort
                 </button>
               </div>
+              <!-- Indicateur de chargement -->
               <div v-else-if="loadingGroup === group.label">
                 <div class="loading-spinner"></div>
               </div>
+              <!-- Bouton pour voir les gagnants tirés au sort -->
               <div v-else-if="selectedGroup === group.label">
                 <button @click="goToResults(group)" class="winners-button">
                   <i class="fa fa-trophy"></i> Voir les Gagnants
@@ -55,32 +62,37 @@ export default {
   },
   data() {
     return {
+      // Groupes de points définis avec leurs limites
       pointGroups: [
         { label: '1500 et moins de 2000', minPoints: 1500, maxPoints: 2000 },
         { label: '2000 et moins de 3000', minPoints: 2000, maxPoints: 3000 },
         { label: '3000 et moins de 5000', minPoints: 3000, maxPoints: 5000 },
         { label: '5000 et plus', minPoints: 5000, maxPoints: Infinity },
       ],
+      // État de chargement et de sélection du groupe
       loadingGroup: null,
       selectedGroup: null,
     };
   },
   methods: {
     ...mapActions(['selectRandomWinners']),
+    // Filtrer les données en fonction du groupe de points
     filteredData(group) {
       return this.fileData.filter(row => {
         const points = row[1];
         return points >= group.minPoints && points < group.maxPoints;
       });
     },
+    // Sélectionner les gagnants de manière aléatoire
     selectWinners(group) {
       this.loadingGroup = group.label;
       setTimeout(() => {
         this.selectRandomWinners(group);
         this.loadingGroup = null;
         this.selectedGroup = group.label;
-      }, 5000); // Simulate a 5 second delay
+      }, 5000); // Simuler un délai de 5 secondes
     },
+    // Naviguer vers la page des résultats
     goToResults(group) {
       this.$router.push({ name: 'resultat_page', params: { group: group.label } });
     }
