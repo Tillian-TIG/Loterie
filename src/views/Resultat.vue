@@ -1,6 +1,6 @@
 <template>
   <section class="home">
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
     <video src="/1.mp4" class="video-slide" autoplay muted loop></video>
     <div class="content">
       <div v-if="winners.length === 0">
@@ -9,8 +9,8 @@
       
       <div v-else class="results-container">
         <div v-for="(winner, index) in winners" :key="index" class="winner-card">
-          <i class="fa fa-user winner-icon"></i>
-          <p>IDENTITE : {{ winner[2] }} {{ winner[3] }}</p>
+          <img src="/win.jpg" alt="Winner Image" class="winner-image">
+          <p>{{ winner[2] }} {{ winner[3] }}</p>
           <p>Numéro : {{ winner[0] }}</p> 
           <p>Points : {{winner[1]}}</p>
         </div>
@@ -90,9 +90,12 @@ section {
   transform: scale(1.05);
 }
 
-.winner-icon {
-  font-size: 50px;
-  color: gold;
+.winner-image {
+  width: 100%;
+  height: auto;
+  max-height: 150px;
+  border-radius: 15px 15px 0 0;
+  object-fit: cover;
   margin-bottom: 10px;
 }
 
