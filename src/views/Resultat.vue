@@ -6,7 +6,6 @@
       <div v-if="winners.length === 0">
         <p>Aucun résultat à afficher. Veuillez tirer au sort depuis la page précédente.</p>
       </div>
-      
       <div v-else class="results-container">
         <div v-for="(winner, index) in winners" :key="index" class="winner-card">
           <img src="/win.jpg" alt="Winner Image" class="winner-image">
@@ -14,12 +13,16 @@
           <p>Numéro : {{ winner[0] }}</p> 
           <p>Points : {{winner[1]}}</p>
         </div>
+        <div class="center-button">
+          <button @click="exportWinners" class="export-button"><i class="fa fa-file-excel"></i> Exporter les gagnants</button>
+        </div>
       </div>
     </div>
   </section>
 </template>
 
 <script>
+import * as XLSX from 'xlsx';
 import { mapGetters } from 'vuex';
 
 export default {
@@ -27,6 +30,17 @@ export default {
     ...mapGetters(['getRandomWinners']),
     winners() {
       return this.getRandomWinners;
+    }
+  },
+  methods: {
+    exportWinners() {
+      const ws = XLSX.utils.aoa_to_sheet([
+        ['MSISDN', 'POINTS', 'FIRSTNAME', 'LASTNAME', 'PROFILE', 'DATE_SUBSCRIPTION'],
+        ...this.winners
+      ]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+      XLSX.writeFile(wb, 'Liste_des_gagnants.xlsx');
     }
   }
 };
@@ -103,5 +117,36 @@ section {
   color: #141414;
   font-weight: bold;
   margin: 5px 0;
+}
+
+.center-button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.export-button {
+  background-color: #f36f21;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 35);
+  cursor: pointer;
+}
+
+.export-button i {
+  margin-right: 8px;
+}
+
+.export-button:hover {
+  background-color: #f36f21;
 }
 </style>
