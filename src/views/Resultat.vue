@@ -7,12 +7,14 @@
         <p>Aucun résultat à afficher. Veuillez tirer au sort depuis la page précédente.</p>
       </div>
       <div v-else class="results-container">
-        <div v-for="(winner, index) in winners" :key="index" class="winner-card">
-          <img src="/win.jpg" alt="Winner Image" class="winner-image">
-          <p>{{ winner[2] }} {{ winner[3] }}</p>
-          <p>Numéro : {{ winner[0] }}</p> 
-          <p>Points : {{winner[1]}}</p>
-        </div>
+        <transition-group name="fade" tag="div" class="results-container">
+          <div v-for="(winner, index) in visibleWinners" :key="index" class="winner-card">
+            <img src="/win.jpg" alt="Winner Image" class="winner-image">
+            <p>{{ winner[2] }} {{ winner[3] }}</p>
+            <p>Numéro : {{ winner[0] }}</p> 
+            <p>Points : {{winner[1]}}</p>
+          </div>
+        </transition-group>
         <div class="center-button">
           <button @click="exportWinners" class="export-button"><i class="fa fa-file-excel"></i> Exporter les gagnants</button>
         </div>
@@ -21,18 +23,44 @@
   </section>
 </template>
 
+
 <script>
 import * as XLSX from 'xlsx';
 import { mapGetters } from 'vuex';
 
 export default {
+  data() {
+    return {
+      visibleWinners: [],
+      intervalId: null,
+    };
+  },
   computed: {
     ...mapGetters(['getRandomWinners']),
     winners() {
       return this.getRandomWinners;
     }
   },
+  mounted() {
+    this.showWinners();
+  },
+  beforeDestroy() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+  },
   methods: {
+    showWinners() {
+      let index = 0;
+      this.intervalId = setInterval(() => {
+        if (index < this.winners.length) {
+          this.visibleWinners.push(this.winners[index]);
+          index++;
+        } else {
+          clearInterval(this.intervalId);
+        }
+      }, 3000);
+    },
     exportWinners() {
       const ws = XLSX.utils.aoa_to_sheet([
         ['MSISDN', 'POINTS', 'FIRSTNAME', 'LASTNAME', 'PROFILE', 'DATE_SUBSCRIPTION'],
@@ -45,6 +73,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css?family=Poppins:wight');
@@ -90,10 +119,18 @@ section {
   gap: 20px;
 }
 
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 1s;
+}
+
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
 .winner-card {
   background-color: rgba(255, 255, 255, 0.945);
   border-radius: 15px;
-  padding: 20px;
+  padding: 15px;
   width: 200px;
   text-align: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -107,10 +144,10 @@ section {
 .winner-image {
   width: 100%;
   height: auto;
-  max-height: 150px;
-  border-radius: 15px 15px 0 0;
+  max-height: 200px;
+  border-radius: 10px 10px 10px 10px;
   object-fit: cover;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .winner-card p {
@@ -127,7 +164,7 @@ section {
 }
 
 .export-button {
-  background-color: #f36f21;
+  background-color: #4caf50;
   color: #fff;
   padding: 10px 20px;
   border: none;
@@ -147,6 +184,7 @@ section {
 }
 
 .export-button:hover {
-  background-color: #f36f21;
+  background-color: #45a049;
 }
 </style>
+
